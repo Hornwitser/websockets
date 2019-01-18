@@ -536,4 +536,4 @@ if sys.version_info[:3] < (3, 5, 1):  # pragma: no cover
 
 else:
 
-    connect = Connect
+    connect = Connect  # type: ignore

@@ -70,10 +70,8 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         self.available_extensions = extensions
         self.available_subprotocols = subprotocols
         self.extra_headers = extra_headers
-        if process_request is not None:
-            self.process_request = process_request
-        if select_subprotocol is not None:
-            self.select_subprotocol = select_subprotocol
+        self._process_request = process_request
+        self._select_subprotocol = select_subprotocol
         super().__init__(**kwds)
 
     def connection_made(self, transport):
@@ -265,6 +263,8 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         function.
 
         """
+        if self._process_request is not None:
+            return self._process_request(path, request_headers)
 
     @staticmethod
     def process_origin(headers, origins=None):
@@ -415,6 +415,9 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         :func:`serve` function.
 
         """
+        if self._select_subprotocol is not None:
+            return self._select_subprotocol(client_subprotocols, server_subprotocols)
+
         subprotocols = set(client_subprotocols) & set(server_subprotocols)
         if not subprotocols:
             return None
@@ -892,4 +895,4 @@ if sys.version_info[:3] < (3, 5, 1):  # pragma: no cover
 
 else:
 
-    serve = Serve
+    serve = Serve  # type: ignore
