@@ -1,3 +1,15 @@
+import http
+from typing import TYPE_CHECKING, Any, Optional
+
+from .http import Headers, HeadersLike
+
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .uri import WebSocketURI
+else:
+    WebSocketURI = Any
+
+
 __all__ = [
     "AbortHandshake",
     "ConnectionClosed",
@@ -33,12 +45,14 @@ class AbortHandshake(InvalidHandshake):
 
     """
 
-    def __init__(self, status, headers, body=b""):
+    def __init__(
+        self, status: http.HTTPStatus, headers: HeadersLike, body: bytes = b""
+    ) -> None:
         self.status = status
-        self.headers = headers
+        self.headers = Headers(headers)
         self.body = body
         message = "HTTP {}, {} headers, {} bytes".format(
-            status, len(headers), len(body)
+            self.status, len(self.headers), len(self.body)
         )
         super().__init__(message)
 
@@ -49,7 +63,7 @@ class RedirectHandshake(InvalidHandshake):
 
     """
 
-    def __init__(self, wsuri):
+    def __init__(self, wsuri: WebSocketURI) -> None:
         self.wsuri = wsuri
 
 
@@ -66,7 +80,7 @@ class InvalidHeader(InvalidHandshake):
 
     """
 
-    def __init__(self, name, value=None):
+    def __init__(self, name: str, value: Optional[str] = None) -> None:
         if value is None:
             message = "Missing {} header".format(name)
         elif value == "":
@@ -82,7 +96,7 @@ class InvalidHeaderFormat(InvalidHeader):
 
     """
 
-    def __init__(self, name, error, string, pos):
+    def __init__(self, name: str, error: str, string: str, pos: int) -> None:
         error = "{} at {} in {}".format(error, pos, string)
         super().__init__(name, error)
 
@@ -107,7 +121,7 @@ class InvalidOrigin(InvalidHeader):
 
     """
 
-    def __init__(self, origin):
+    def __init__(self, origin: Optional[str]) -> None:
         super().__init__("Origin", origin)
 
 
@@ -119,7 +133,7 @@ class InvalidStatusCode(InvalidHandshake):
 
     """
 
-    def __init__(self, status_code):
+    def __init__(self, status_code: int) -> None:
         self.status_code = status_code
         message = "Status code not 101: {}".format(status_code)
         super().__init__(message)
@@ -138,7 +152,7 @@ class InvalidParameterName(NegotiationError):
 
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.name = name
         message = "Invalid parameter name: {}".format(name)
         super().__init__(message)
@@ -150,7 +164,7 @@ class InvalidParameterValue(NegotiationError):
 
     """
 
-    def __init__(self, name, value):
+    def __init__(self, name: str, value: Optional[str]) -> None:
         self.name = name
         self.value = value
         message = "Invalid value for parameter {}: {}".format(name, value)
@@ -163,7 +177,7 @@ class DuplicateParameter(NegotiationError):
 
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.name = name
         message = "Duplicate parameter: {}".format(name)
         super().__init__(message)
@@ -193,7 +207,7 @@ CLOSE_CODES = {
 }
 
 
-def format_close(code, reason):
+def format_close(code: int, reason: str) -> str:
     """
     Display a human-readable version of the close code and reason.
 
@@ -224,7 +238,7 @@ class ConnectionClosed(InvalidState):
 
     """
 
-    def __init__(self, code, reason):
+    def __init__(self, code: int, reason: str) -> None:
         self.code = code
         self.reason = reason
         message = "WebSocket connection is closed: "
@@ -237,6 +251,11 @@ class InvalidURI(Exception):
     Exception raised when an URI isn't a valid websocket URI.
 
     """
+
+    def __init__(self, uri: str) -> None:
+        self.uri = uri
+        message = "{} isn't a valid URI".format(uri)
+        super().__init__(message)
 
 
 class PayloadTooBig(Exception):

@@ -1,7 +1,11 @@
+from typing import AsyncIterator
+
 from ..exceptions import ConnectionClosed
+from ..framing import Data
+from ..protocol import WebSocketCommonProtocol
 
 
-async def __aiter__(self):
+async def __aiter__(self: WebSocketCommonProtocol) -> AsyncIterator[Data]:
     """
     Iterate on received messages.
 
