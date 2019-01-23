@@ -15,17 +15,9 @@ import logging
 import random
 import struct
 import sys
-from typing import (
-    Any,
-    AsyncIterable,
-    Awaitable,
-    Deque,
-    Iterable,
-    List,
-    Optional,
-    Union,
-    cast,
-)
+from typing import Deque  # noqa
+from typing import List  # noqa
+from typing import Any, AsyncIterable, Awaitable, Iterable, Optional, Union, cast
 
 from .exceptions import (
     ConnectionClosed,
@@ -33,11 +25,11 @@ from .exceptions import (
     PayloadTooBig,
     WebSocketProtocolError,
 )
-from .extensions.base import Extension
+from .extensions.base import Extension  # noqa
 from .framing import *
 from .framing import Data
 from .handshake import *
-from .http import Headers
+from .http import Headers  # noqa
 
 
 __all__ = ["WebSocketCommonProtocol"]
@@ -164,8 +156,11 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
     # There are only two differences between the client-side and server-side
     # behavior: masking the payload and closing the underlying TCP connection.
     # Set is_client = True/False and side = "client"/"server" to pick a side.
-    is_client: bool
-    side: str = "undefined"
+
+    # is_client shouldn't have a default value, but needs to because Python
+    # 3.5 doesn't support annotating variables.
+    is_client = None  # type: bool
+    side = "undefined"  # type: str
 
     def __init__(
         self,
@@ -215,8 +210,6 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         stream_reader = asyncio.StreamReader(limit=read_limit // 2, loop=loop)
         super().__init__(stream_reader, self.client_connected, loop)
 
-        self.reader: asyncio.StreamReader
-        self.writer: asyncio.StreamWriter
         self._drain_lock = asyncio.Lock(loop=loop)
 
         # This class implements the data transfer and closing handshake, which
@@ -227,46 +220,48 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         logger.debug("%s - state = CONNECTING", self.side)
 
         # HTTP protocol parameters.
-        self.path: str
-        self.request_headers: Headers
-        self.response_headers: Headers
+        # self.path: str
+        # self.request_headers: Headers
+        # self.response_headers: Headers
 
         # WebSocket protocol parameters.
-        self.extensions: List[Extension] = []
-        self.subprotocol: Optional[str] = None
+        self.extensions = []  # type: List[Extension]
+        self.subprotocol = None  # type: Optional[str]
 
         # The close code and reason are set when receiving a close frame or
         # losing the TCP connection.
-        self.close_code: int
-        self.close_reason: str
+        # self.close_code: int
+        # self.close_reason: str
 
         # Completed when the connection state becomes CLOSED. Translates the
         # :meth:`connection_lost()` callback to a :class:`~asyncio.Future`
         # that can be awaited. (Other :class:`~asyncio.Protocol` callbacks are
         # translated by ``self.stream_reader``).
-        self.connection_lost_waiter: asyncio.Future[None] = asyncio.Future(loop=loop)
+        self.connection_lost_waiter = asyncio.Future(
+            loop=loop
+        )  # type: asyncio.Future[None]
 
         # Queue of received messages.
-        self.messages: Deque[Data] = collections.deque()
-        self._pop_message_waiter: Optional[asyncio.Future[None]] = None
-        self._put_message_waiter: Optional[asyncio.Future[None]] = None
+        self.messages = collections.deque()  # type: Deque[Data]
+        self._pop_message_waiter = None  # type: Optional[asyncio.Future[None]]
+        self._put_message_waiter = None  # type: Optional[asyncio.Future[None]]
 
         # Mapping of ping IDs to waiters, in chronological order.
-        self.pings: collections.OrderedDict[
-            bytes, asyncio.Future[None]
-        ] = collections.OrderedDict()
+        self.pings = (
+            collections.OrderedDict()
+        )  # type: collections.OrderedDict[bytes, asyncio.Future[None]]
 
         # Task running the data transfer.
-        self.transfer_data_task: asyncio.Task[None]
+        # self.transfer_data_task: asyncio.Task[None]
 
         # Exception that occurred during data transfer, if any.
-        self.transfer_data_exc: Optional[BaseException] = None
+        self.transfer_data_exc = None  # type: Optional[BaseException]
 
         # Task sending keepalive pings.
-        self.keepalive_ping_task: asyncio.Task[None]
+        # self.keepalive_ping_task: asyncio.Task[None]
 
         # Task closing the TCP connection.
-        self.close_connection_task: asyncio.Task[None]
+        # self.close_connection_task: asyncio.Task[None]
 
     def client_connected(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
@@ -406,7 +401,9 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         # Wait until there's a message in the queue (if necessary) or the
         # connection is closed.
         while len(self.messages) <= 0:
-            pop_message_waiter: asyncio.Future[None] = asyncio.Future(loop=self.loop)
+            pop_message_waiter = asyncio.Future(
+                loop=self.loop
+            )  # type: asyncio.Future[None]
             self._pop_message_waiter = pop_message_waiter
             try:
                 # If asyncio.wait() is canceled, it doesn't cancel
@@ -770,7 +767,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
             return frame.data.decode("utf-8") if text else frame.data
 
         # 5.4. Fragmentation
-        chunks: List[Data] = []
+        chunks = []  # type: List[Data]
         max_size = self.max_size
         if text:
             decoder_factory = codecs.getincrementaldecoder("utf-8")

@@ -12,6 +12,7 @@ import socket
 import sys
 import warnings
 from types import TracebackType
+from typing import Set  # noqa
 from typing import (
     Any,
     Awaitable,
@@ -20,7 +21,6 @@ from typing import (
     List,
     Optional,
     Sequence,
-    Set,
     Tuple,
     Type,
     Union,
@@ -39,12 +39,8 @@ from .exceptions import (
 from .extensions.base import Extension, ServerExtensionFactory
 from .extensions.permessage_deflate import ServerPerMessageDeflateFactory
 from .handshake import build_response, check_request
-from .headers import (
-    ExtensionHeader,
-    build_extension_list,
-    parse_extension_list,
-    parse_subprotocol_list,
-)
+from .headers import ExtensionHeader  # noqa
+from .headers import build_extension_list, parse_extension_list, parse_subprotocol_list
 from .http import USER_AGENT, Headers, HeadersLike, MultipleValuesError, read_request
 from .protocol import State, WebSocketCommonProtocol
 
@@ -358,19 +354,19 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         order of extensions, may be implemented by overriding this method.
 
         """
-        response_header_value: Optional[str] = None
+        response_header_value = None  # type: Optional[str]
 
-        extension_headers: List[ExtensionHeader] = []
-        accepted_extensions: List[Extension] = []
+        extension_headers = []  # type: List[ExtensionHeader]
+        accepted_extensions = []  # type: List[Extension]
 
         header_values = headers.get_all("Sec-WebSocket-Extensions")
 
         if header_values and available_extensions:
 
-            parsed_header_values: List[ExtensionHeader] = sum(
+            parsed_header_values = sum(
                 [parse_extension_list(header_value) for header_value in header_values],
                 [],
-            )
+            )  # type: List[ExtensionHeader]
 
             for name, request_params in parsed_header_values:
 
@@ -415,19 +411,19 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         as the selected subprotocol.
 
         """
-        subprotocol: Optional[str] = None
+        subprotocol = None  # type: Optional[str]
 
         header_values = headers.get_all("Sec-WebSocket-Protocol")
 
         if header_values and available_subprotocols:
 
-            parsed_header_values: List[str] = sum(
+            parsed_header_values = sum(
                 [
                     parse_subprotocol_list(header_value)
                     for header_value in header_values
                 ],
                 [],
-            )
+            )  # type: List[str]
 
             subprotocol = self.select_subprotocol(
                 parsed_header_values, available_subprotocols
@@ -585,13 +581,13 @@ class WebSocketServer:
         self.loop = loop
 
         # Keep track of active connections.
-        self.websockets: Set[WebSocketServerProtocol] = set()
+        self.websockets = set()  # type: Set[WebSocketServerProtocol]
 
         # Task responsible for closing the server and terminating connections.
-        self.close_task: Optional[asyncio.Task[None]] = None
+        self.close_task = None  # type: Optional[asyncio.Task[None]]
 
         # Completed when the server is closed and connections are terminated.
-        self.closed_waiter: asyncio.Future[None] = asyncio.Future(loop=loop)
+        self.closed_waiter = asyncio.Future(loop=loop)  # type: asyncio.Future[None]
 
     def wrap(self, server: asyncio.AbstractServer) -> None:
         """

@@ -186,7 +186,7 @@ def _build_parameters(
     Build a list of ``(name, value)`` pairs for some compression parameters.
 
     """
-    params: ExtensionParameters = []
+    params = []  # type: ExtensionParameters
     if server_no_context_takeover:
         params.append(("server_no_context_takeover", None))
     if client_no_context_takeover:
@@ -210,10 +210,10 @@ def _extract_parameters(
     without a value. This is only allow in handshake requests.
 
     """
-    server_no_context_takeover: bool = False
-    client_no_context_takeover: bool = False
-    server_max_window_bits: Optional[int] = None
-    client_max_window_bits: Optional[Union[int, bool]] = None
+    server_no_context_takeover = False  # type: bool
+    client_no_context_takeover = False  # type: bool
+    server_max_window_bits = None  # type: Optional[int]
+    client_max_window_bits = None  # type: Optional[Union[int, bool]]
 
     for name, value in params:
 

@@ -20,8 +20,8 @@ from .exceptions import (
 from .extensions.base import ClientExtensionFactory, Extension
 from .extensions.permessage_deflate import ClientPerMessageDeflateFactory
 from .handshake import build_request, check_response
+from .headers import ExtensionHeader  # noqa
 from .headers import (
-    ExtensionHeader,
     build_basic_auth,
     build_extension_list,
     build_subprotocol_list,
@@ -137,7 +137,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
         order of extensions, may be implemented by overriding this method.
 
         """
-        accepted_extensions: List[Extension] = []
+        accepted_extensions = []  # type: List[Extension]
 
         header_values = headers.get_all("Sec-WebSocket-Extensions")
 
@@ -146,10 +146,10 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
             if available_extensions is None:
                 raise InvalidHandshake("No extensions supported")
 
-            parsed_header_values: List[ExtensionHeader] = sum(
+            parsed_header_values = sum(
                 [parse_extension_list(header_value) for header_value in header_values],
                 [],
-            )
+            )  # type: List[ExtensionHeader]
 
             for name, response_params in parsed_header_values:
 
@@ -196,7 +196,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
         Return the selected subprotocol.
 
         """
-        subprotocol: Optional[str] = None
+        subprotocol = None  # type: Optional[str]
 
         header_values = headers.get_all("Sec-WebSocket-Protocol")
 
@@ -205,13 +205,13 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
             if available_subprotocols is None:
                 raise InvalidHandshake("No subprotocols supported")
 
-            parsed_header_values: List[str] = sum(
+            parsed_header_values = sum(
                 [
                     parse_subprotocol_list(header_value)
                     for header_value in header_values
                 ],
                 [],
-            )
+            )  # type: List[str]
 
             if len(parsed_header_values) > 1:
                 raise InvalidHandshake(
@@ -472,8 +472,8 @@ class Connect:
             extra_headers=self._extra_headers,
         )
 
-        host: Optional[str]
-        port: Optional[int]
+        host = None  # type: Optional[str]
+        port = None  # type: Optional[int]
         if self._kwds.get("sock") is None:
             host, port = self._wsuri.host, self._wsuri.port
         else:

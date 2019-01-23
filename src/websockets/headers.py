@@ -237,7 +237,7 @@ def parse_extension_param(
     name, pos = parse_token(string, pos, header_name)
     pos = parse_OWS(string, pos)
     # Extract parameter value, if there is one.
-    value: Optional[str] = None
+    value = None  # type: Optional[str]
     if peek_ahead(string, pos) == "=":
         pos = parse_OWS(string, pos + 1)
         if peek_ahead(string, pos) == '"':

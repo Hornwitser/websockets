@@ -10,17 +10,8 @@ from :mod:`websockets.http`.
 import asyncio
 import re
 import sys
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    Iterator,
-    List,
-    Mapping,
-    MutableMapping,
-    Tuple,
-    Union,
-)
+from typing import Dict  # noqa
+from typing import Any, Iterable, Iterator, List, Mapping, MutableMapping, Tuple, Union
 
 from .version import version as websockets_version
 
@@ -257,8 +248,8 @@ class Headers(MutableMapping[str, str]):
     __slots__ = ["_dict", "_list"]
 
     def __init__(self, *args: Any, **kwargs: str) -> None:
-        self._dict: Dict[str, List[str]] = {}
-        self._list: List[Tuple[str, str]] = []
+        self._dict = {}  # type: Dict[str, List[str]]
+        self._list = []  # type: List[Tuple[str, str]]
         # MutableMapping.update calls __setitem__ for each (name, value) pair.
         self.update(*args, **kwargs)
 

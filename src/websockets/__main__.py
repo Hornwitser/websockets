@@ -4,7 +4,7 @@ import os
 import signal
 import sys
 import threading
-from typing import Any, Set
+from typing import Any, Set  # noqa
 
 import websockets
 from websockets.exceptions import format_close
@@ -109,10 +109,12 @@ async def run_client(
 
     try:
         while True:
-            incoming: asyncio.Future[Any] = asyncio.ensure_future(websocket.recv())
-            outgoing: asyncio.Future[Any] = asyncio.ensure_future(inputs.get())
-            done: Set[asyncio.Future[Any]]
-            pending: Set[asyncio.Future[Any]]
+            incoming = asyncio.ensure_future(
+                websocket.recv()
+            )  # type: asyncio.Future[Any]
+            outgoing = asyncio.ensure_future(inputs.get())  # type: asyncio.Future[Any]
+            done = set()  # type: Set[asyncio.Future[Any]]
+            pending = set()  # type: Set[asyncio.Future[Any]]
             done, pending = await asyncio.wait(
                 [incoming, outgoing, stop], return_when=asyncio.FIRST_COMPLETED
             )
