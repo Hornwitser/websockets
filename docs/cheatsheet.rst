@@ -74,7 +74,8 @@ The logs contain:
 
 * Exceptions in the connection handler at the ``ERROR`` level
 * Exceptions in the opening or closing handshake at the ``INFO`` level
-* All frames at the ``DEBUG`` level — this can be very verbose
+* All frames at the ``DEBUG`` provided python is running without optimizations
+  enabled (the ``-O`` commandline flag) — this can be very verbose
 
 If you're new to ``asyncio``, you will certainly encounter issues that are
 related to asynchronous programming in general rather than to ``websockets``

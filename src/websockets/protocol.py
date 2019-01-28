@@ -892,7 +892,8 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
             max_size=max_size,
             extensions=self.extensions,
         )
-        logger.debug("%s < %r", self.side, frame)
+        if __debug__:
+            logger.debug("%s < %s", self.side, frame)
         return frame
 
     async def write_frame(self, fin, opcode, data, *, _expected_state=State.OPEN):
@@ -903,7 +904,8 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
             )
 
         frame = Frame(fin, opcode, data)
-        logger.debug("%s > %r", self.side, frame)
+        if __debug__:
+            logger.debug("%s > %s", self.side, frame)
         frame.write(self.writer.write, mask=self.is_client, extensions=self.extensions)
 
         try:

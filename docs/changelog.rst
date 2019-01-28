@@ -32,6 +32,9 @@ Also:
 
 * Documented how to optimize memory usage.
 
+* Logging of frames is disabled when running with optimizations enabled
+  (the ``-O`` commandline flag.)
+
 7.0
 ...
 
